@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Word Game</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: Arial; 
+      text-align: center; 
+      background: #1a1a2e; 
+      color: white; 
+      padding: 20px; 
+    }
+    h1 { color: #e94560; font-size: 36px; margin-bottom: 10px; }
+    #board { 
+      display: grid; 
+      grid-template-rows: repeat(6, 1fr);
+      gap: 5px; 
+      width: 300px; 
+      margin: 20px auto; 
+    }
+    .row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+    .cell { 
+      width: 54px; height: 54px; 
+      border: 2px solid #555; 
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; font-weight: bold;
+      text-transform: uppercase;
+      background: #16213e;
+    }
+    .correct { background: #538d4e !important; border-color: #538d4e; }
+    .present { background: #b59f3b !important; border-color: #b59f3b; }
+    .absent  { background: #3a3a3c !important; border-color: #3a3a3c; }
+    #input-area { margin: 10px auto; }
+    #guess-input { 
+      padding: 10px; font-size: 20px; 
+      width: 160px; text-align: center;
+      background: #16213e; color: white;
+      border: 2px solid #e94560; border-radius: 8px;
+      text-transform: uppercase;
+    }
+    #submit-btn { 
+      padding: 10px 20px; font-size: 18px;
+      background: #e94560; color: white;
+      border: none; border-radius: 8px;
+      cursor: pointer; margin-left: 8px;
+    }
+    #submit-btn:hover { background: #c73652; }
+    #message { 
+      font-size: 22px; margin-top: 15px; 
+      color: #e94560; font-weight: bold;
+    }
+    #new-game-btn {
+      display: none;
+      margin: 10px auto;
+      padding: 10px 24px; font-size: 18px;
+      background: #538d4e; color: white;
+      border: none; border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎮 Word Guess Game</h1>
+  <p style="color:#aaa">Guess the 5-letter word in 6 tries!</p>
+
+  <div id="board">
+    <div class="row" id="row-0"></div>
+    <div class="row" id="row-1"></div>
+    <div class="row" id="row-2"></div>
+    <div class="row" id="row-3"></div>
+    <div class="row" id="row-4"></div>
+    <div class="row" id="row-5"></div>
+  </div>
+
+  <div id="input-area">
+    <input id="guess-input" maxlength="5" placeholder="GUESS"/>
+    <button id="submit-btn" onclick="submitGuess()">GO</button>
+  </div>
+
+  <div id="message"></div>
+  <button id="new-game-btn" onclick="location.reload()">🔄 New Game</button>
+
+  <script>
+    const word = "{{ word }}";
+    let currentRow = 0;
+    let gameOver = false;
+
+    // Build empty cells
+    for (let r = 0; r < 6; r++) {
+      const row = document.getElementById('row-' + r);
+      for (let c = 0; c < 5; c++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.id = 'cell-' + r + '-' + c;
+        row.appendChild(cell);
+      }
+    }
+
+    document.getElementById('guess-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') submitGuess();
+    });
+
+    function submitGuess() {
+      if (gameOver) return;
+      const input = document.getElementById('guess-input');
+      const guess = input.value.toUpperCase();
+
+      if (guess.length !== 5) {
+        document.getElementById('message').textContent = '⚠️ Enter a 5 letter word!';
+        return;
+      }
+
+      fetch('/check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guess: guess, word: word })
+      })
+      .then(res => res.json())
+      .then(result => {
+        for (let c = 0; c < 5; c++) {
+          const cell = document.getElementById('cell-' + currentRow + '-' + c);
+          cell.textContent = guess[c];
+          cell.classList.add(result[c]);
+        }
+
+        if (guess === word) {
+          document.getElementById('message').textContent = '🎉 You got it! The word was ' + word + '!';
+          gameOver = true;
+          document.getElementById('new-game-btn').style.display = 'block';
+        } else if (currentRow === 5) {
+          document.getElementById('message').textContent = '😢 Game over! The word was ' + word;
+          gameOver = true;
+          document.getElementById('new-game-btn').style.display = 'block';
+        } else {
+          document.getElementById('message').textContent = '';
+        }
+        currentRow++;
+        input.value = '';
+        input.focus();
+      });
+    }
+  </script>
+</body>
+</html>
