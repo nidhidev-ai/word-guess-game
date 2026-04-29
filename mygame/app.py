@@ -3,8 +3,13 @@ import random
 
 app = Flask(__name__)
 
-words = ['PYTHON', 'FLASK', 'BRAIN', 'CLOUD', 'SMILE', 
-         'EARTH', 'MUSIC', 'DANCE', 'LIGHT', 'STONE']
+words = ['FLASK', 'BRAIN', 'CLOUD', 'SMILE',
+         'EARTH', 'MUSIC', 'DANCE', 'LIGHT', 'STONE',
+         'PLANT', 'CHAIR', 'BREAD', 'BEACH', 'CLOCK',
+         'DRINK', 'FLAME', 'GIANT', 'HEART', 'JUICE',
+         'KNIFE', 'LEMON', 'MANGO', 'NIGHT', 'OCEAN',
+         'PAINT', 'QUEEN', 'RIVER', 'SUGAR', 'TIGER',
+         'UNDER', 'VOICE', 'WATER', 'YOUTH', 'ZEBRA']
 
 @app.route('/')
 def home():
