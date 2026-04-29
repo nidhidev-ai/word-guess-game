@@ -63,6 +63,9 @@
 <body>
   <h1>🎮 Word Guess Game</h1>
   <p style="color:#aaa">Guess the 5-letter word in 6 tries!</p>
+  <div id="score" style="font-size: 20px; margin: 10px;">
+  🏆 Wins: <span id="wins">0</span> | 💀 Losses: <span id="losses">0</span>
+</div>
 
   <div id="board">
     <div class="row" id="row-0"></div>
@@ -77,14 +80,33 @@
     <input id="guess-input" maxlength="5" placeholder="GUESS"/>
     <button id="submit-btn" onclick="submitGuess()">GO</button>
   </div>
-
+  <div id="timer" style="font-size: 32px; color: #e94560; font-weight: bold; margin: 10px;">⏱️ 60</div> 
   <div id="message"></div>
   <button id="new-game-btn" onclick="location.reload()">🔄 New Game</button>
 
   <script>
+    let timeLeft = 60;
+let timerInterval = setInterval(function() {
+  timeLeft--;
+  document.getElementById('timer').textContent = '⏱️ ' + timeLeft;
+  if (timeLeft <= 10) {
+    document.getElementById('timer').style.color = 'red';
+  }
+  if (timeLeft <= 0) {
+    clearInterval(timerInterval);
+    gameOver = true;
+    document.getElementById('message').textContent = '⏰ Time up! The word was ' + word;
+    document.getElementById('new-game-btn').style.display = 'block';
+  }
+}, 1000);
     const word = "{{ word }}";
     let currentRow = 0;
     let gameOver = false;
+    let wins = parseInt(localStorage.getItem('wins') || 0);
+let losses = parseInt(localStorage.getItem('losses') || 0);
+document.getElementById('wins').textContent = wins;
+document.getElementById('losses').textContent = losses;
+
 
     // Build empty cells
     for (let r = 0; r < 6; r++) {
@@ -126,10 +148,16 @@
 
         if (guess === word) {
           document.getElementById('message').textContent = '🎉 You got it! The word was ' + word + '!';
+          wins++;
+          localStorage.setItem('wins', wins);
+          document.getElementById('wins').textContent = wins;
           gameOver = true;
           document.getElementById('new-game-btn').style.display = 'block';
         } else if (currentRow === 5) {
           document.getElementById('message').textContent = '😢 Game over! The word was ' + word;
+          losses++;
+          localStorage.setItem('losses', losses);
+          document.getElementById('losses').textContent = losses;
           gameOver = true;
           document.getElementById('new-game-btn').style.display = 'block';
         } else {
