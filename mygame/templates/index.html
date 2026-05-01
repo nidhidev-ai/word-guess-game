@@ -82,6 +82,16 @@
   </div>
   <div id="timer" style="font-size: 32px; color: #e94560; font-weight: bold; margin: 10px;">⏱️ 60</div> 
   <div id="message"></div>
+  <button id="hint-btn" onclick="giveHint()" style="
+  display: block;
+  margin: 10px auto;
+  padding: 10px 24px;
+  font-size: 18px;
+  background: #b59f3b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;">💡 Hint (3 left)</button>
   <button id="new-game-btn" onclick="location.reload()">🔄 New Game</button>
 
   <script>
@@ -102,6 +112,7 @@ let timerInterval = setInterval(function() {
     const word = "{{ word }}";
     let currentRow = 0;
     let gameOver = false;
+    let hints = 3;
     let wins = parseInt(localStorage.getItem('wins') || 0);
 let losses = parseInt(localStorage.getItem('losses') || 0);
 document.getElementById('wins').textContent = wins;
@@ -168,6 +179,25 @@ document.getElementById('losses').textContent = losses;
         input.focus();
       });
     }
+    function giveHint() {
+  if (hints <= 0) {
+    alert('No hints left!');
+    return;
+  }
+  if (gameOver) return;
+  
+  for (let c = 0; c < 5; c++) {
+    const cell = document.getElementById('cell-' + currentRow + '-' + c);
+    if (cell.textContent === '') {
+      cell.textContent = word[c];
+      cell.style.color = '#b59f3b';
+      hints--;
+      document.getElementById('hint-btn').textContent = '💡 Hint (' + hints + ' left)';
+      break;
+    }
+  }
+}
+
   </script>
 </body>
 </html>
