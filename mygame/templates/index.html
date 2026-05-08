@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>My Word Game</title>
+  <title>Word Guess Game</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { 
@@ -12,6 +12,8 @@
       padding: 20px; 
     }
     h1 { color: #e94560; font-size: 36px; margin-bottom: 10px; }
+    #score { font-size: 20px; margin: 10px; }
+    #timer { font-size: 32px; color: #e94560; font-weight: bold; margin: 10px; }
     #board { 
       display: grid; 
       grid-template-rows: repeat(6, 1fr);
@@ -27,45 +29,57 @@
       font-size: 24px; font-weight: bold;
       text-transform: uppercase;
       background: #16213e;
+      transition: transform 0.1s;
     }
     .correct { background: #538d4e !important; border-color: #538d4e; }
     .present { background: #b59f3b !important; border-color: #b59f3b; }
     .absent  { background: #3a3a3c !important; border-color: #3a3a3c; }
-    #input-area { margin: 10px auto; }
-    #guess-input { 
-      padding: 10px; font-size: 20px; 
-      width: 160px; text-align: center;
-      background: #16213e; color: white;
-      border: 2px solid #e94560; border-radius: 8px;
+
+    /* Keyboard */
+    #keyboard { margin: 20px auto; width: 340px; }
+    .key-row { display: flex; justify-content: center; gap: 5px; margin: 5px 0; }
+    .key { 
+      padding: 15px 10px;
+      min-width: 32px;
+      background: #818384;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
       text-transform: uppercase;
     }
-    #submit-btn { 
-      padding: 10px 20px; font-size: 18px;
-      background: #e94560; color: white;
-      border: none; border-radius: 8px;
-      cursor: pointer; margin-left: 8px;
-    }
-    #submit-btn:hover { background: #c73652; }
-    #message { 
-      font-size: 22px; margin-top: 15px; 
-      color: #e94560; font-weight: bold;
+    .key:hover { opacity: 0.8; }
+    .key.wide { min-width: 50px; font-size: 11px; }
+    .key.correct { background: #538d4e; }
+    .key.present { background: #b59f3b; }
+    .key.absent { background: #3a3a3c; }
+
+    #message { font-size: 22px; margin-top: 15px; color: #e94560; font-weight: bold; }
+    #hint-btn {
+      display: block; margin: 10px auto;
+      padding: 10px 24px; font-size: 18px;
+      background: #b59f3b; color: white;
+      border: none; border-radius: 8px; cursor: pointer;
     }
     #new-game-btn {
-      display: none;
-      margin: 10px auto;
+      display: none; margin: 10px auto;
       padding: 10px 24px; font-size: 18px;
       background: #538d4e; color: white;
-      border: none; border-radius: 8px;
-      cursor: pointer;
+      border: none; border-radius: 8px; cursor: pointer;
     }
   </style>
 </head>
 <body>
   <h1>🎮 Word Guess Game</h1>
   <p style="color:#aaa">Guess the 5-letter word in 6 tries!</p>
-  <div id="score" style="font-size: 20px; margin: 10px;">
-  🏆 Wins: <span id="wins">0</span> | 💀 Losses: <span id="losses">0</span>
-</div>
+
+  <div id="score">
+    🏆 Wins: <span id="wins">0</span> | 💀 Losses: <span id="losses">0</span>
+  </div>
+
+  <div id="timer">⏱️ 60</div>
 
   <div id="board">
     <div class="row" id="row-0"></div>
@@ -76,50 +90,81 @@
     <div class="row" id="row-5"></div>
   </div>
 
-  <div id="input-area">
-    <input id="guess-input" maxlength="5" placeholder="GUESS"/>
-    <button id="submit-btn" onclick="submitGuess()">GO</button>
+  <!-- On Screen Keyboard -->
+  <div id="keyboard">
+    <div class="key-row">
+      <button class="key" onclick="pressKey('Q')">Q</button>
+      <button class="key" onclick="pressKey('W')">W</button>
+      <button class="key" onclick="pressKey('E')">E</button>
+      <button class="key" onclick="pressKey('R')">R</button>
+      <button class="key" onclick="pressKey('T')">T</button>
+      <button class="key" onclick="pressKey('Y')">Y</button>
+      <button class="key" onclick="pressKey('U')">U</button>
+      <button class="key" onclick="pressKey('I')">I</button>
+      <button class="key" onclick="pressKey('O')">O</button>
+      <button class="key" onclick="pressKey('P')">P</button>
+    </div>
+    <div class="key-row">
+      <button class="key" onclick="pressKey('A')">A</button>
+      <button class="key" onclick="pressKey('S')">S</button>
+      <button class="key" onclick="pressKey('D')">D</button>
+      <button class="key" onclick="pressKey('F')">F</button>
+      <button class="key" onclick="pressKey('G')">G</button>
+      <button class="key" onclick="pressKey('H')">H</button>
+      <button class="key" onclick="pressKey('J')">J</button>
+      <button class="key" onclick="pressKey('K')">K</button>
+      <button class="key" onclick="pressKey('L')">L</button>
+    </div>
+    <div class="key-row">
+      <button class="key wide" onclick="submitGuess()">ENTER</button>
+      <button class="key" onclick="pressKey('Z')">Z</button>
+      <button class="key" onclick="pressKey('X')">X</button>
+      <button class="key" onclick="pressKey('C')">C</button>
+      <button class="key" onclick="pressKey('V')">V</button>
+      <button class="key" onclick="pressKey('B')">B</button>
+      <button class="key" onclick="pressKey('N')">N</button>
+      <button class="key" onclick="pressKey('M')">M</button>
+      <button class="key wide" onclick="deleteLetter()">⌫</button>
+    </div>
   </div>
-  <div id="timer" style="font-size: 32px; color: #e94560; font-weight: bold; margin: 10px;">⏱️ 60</div> 
+
   <div id="message"></div>
-  <button id="hint-btn" onclick="giveHint()" style="
-  display: block;
-  margin: 10px auto;
-  padding: 10px 24px;
-  font-size: 18px;
-  background: #b59f3b;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;">💡 Hint (3 left)</button>
+  <button id="hint-btn" onclick="giveHint()">💡 Hint (3 left)</button>
   <button id="new-game-btn" onclick="location.reload()">🔄 New Game</button>
 
   <script>
-    let timeLeft = 60;
-let timerInterval = setInterval(function() {
-  timeLeft--;
-  document.getElementById('timer').textContent = '⏱️ ' + timeLeft;
-  if (timeLeft <= 10) {
-    document.getElementById('timer').style.color = 'red';
-  }
-  if (timeLeft <= 0) {
-    clearInterval(timerInterval);
-    gameOver = true;
-    document.getElementById('message').textContent = '⏰ Time up! The word was ' + word;
-    document.getElementById('new-game-btn').style.display = 'block';
-  }
-}, 1000);
     const word = "{{ word }}";
     let currentRow = 0;
+    let currentCol = 0;
     let gameOver = false;
     let hints = 3;
+    let currentGuess = '';
+
     let wins = parseInt(localStorage.getItem('wins') || 0);
-let losses = parseInt(localStorage.getItem('losses') || 0);
-document.getElementById('wins').textContent = wins;
-document.getElementById('losses').textContent = losses;
+    let losses = parseInt(localStorage.getItem('losses') || 0);
+    document.getElementById('wins').textContent = wins;
+    document.getElementById('losses').textContent = losses;
 
+    // Timer
+    let timeLeft = 60;
+    let timerInterval = setInterval(function() {
+      timeLeft--;
+      document.getElementById('timer').textContent = '⏱️ ' + timeLeft;
+      if (timeLeft <= 10) {
+        document.getElementById('timer').style.color = 'red';
+      }
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        gameOver = true;
+        document.getElementById('message').textContent = '⏰ Time up! The word was ' + word;
+        document.getElementById('new-game-btn').style.display = 'block';
+        losses++;
+        localStorage.setItem('losses', losses);
+        document.getElementById('losses').textContent = losses;
+      }
+    }, 1000);
 
-    // Build empty cells
+    // Build board
     for (let r = 0; r < 6; r++) {
       const row = document.getElementById('row-' + r);
       for (let c = 0; c < 5; c++) {
@@ -130,16 +175,34 @@ document.getElementById('losses').textContent = losses;
       }
     }
 
-    document.getElementById('guess-input').addEventListener('keydown', function(e) {
+    // Keyboard press
+    function pressKey(letter) {
+      if (gameOver) return;
+      if (currentGuess.length < 5) {
+        currentGuess += letter;
+        document.getElementById('cell-' + currentRow + '-' + (currentGuess.length - 1)).textContent = letter;
+      }
+    }
+
+    // Delete letter
+    function deleteLetter() {
+      if (gameOver) return;
+      if (currentGuess.length > 0) {
+        document.getElementById('cell-' + currentRow + '-' + (currentGuess.length - 1)).textContent = '';
+        currentGuess = currentGuess.slice(0, -1);
+      }
+    }
+
+    // Physical keyboard support
+    document.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') submitGuess();
+      else if (e.key === 'Backspace') deleteLetter();
+      else if (e.key.match(/^[a-zA-Z]$/)) pressKey(e.key.toUpperCase());
     });
 
     function submitGuess() {
       if (gameOver) return;
-      const input = document.getElementById('guess-input');
-      const guess = input.value.toUpperCase();
-
-      if (guess.length !== 5) {
+      if (currentGuess.length !== 5) {
         document.getElementById('message').textContent = '⚠️ Enter a 5 letter word!';
         return;
       }
@@ -147,57 +210,62 @@ document.getElementById('losses').textContent = losses;
       fetch('/check', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ guess: guess, word: word })
+        body: JSON.stringify({ guess: currentGuess, word: word })
       })
       .then(res => res.json())
       .then(result => {
         for (let c = 0; c < 5; c++) {
           const cell = document.getElementById('cell-' + currentRow + '-' + c);
-          cell.textContent = guess[c];
           cell.classList.add(result[c]);
+
+          // Update keyboard colors
+          const keyBtn = document.querySelector(`button.key[onclick="pressKey('${currentGuess[c]}')"]`);
+          if (keyBtn) {
+            if (result[c] === 'correct') keyBtn.className = 'key correct';
+            else if (result[c] === 'present' && !keyBtn.classList.contains('correct')) keyBtn.className = 'key present';
+            else if (result[c] === 'absent' && !keyBtn.classList.contains('correct') && !keyBtn.classList.contains('present')) keyBtn.className = 'key absent';
+          }
         }
 
-        if (guess === word) {
+        if (currentGuess === word) {
+          clearInterval(timerInterval);
           document.getElementById('message').textContent = '🎉 You got it! The word was ' + word + '!';
+          gameOver = true;
           wins++;
           localStorage.setItem('wins', wins);
           document.getElementById('wins').textContent = wins;
-          gameOver = true;
           document.getElementById('new-game-btn').style.display = 'block';
         } else if (currentRow === 5) {
+          clearInterval(timerInterval);
           document.getElementById('message').textContent = '😢 Game over! The word was ' + word;
+          gameOver = true;
           losses++;
           localStorage.setItem('losses', losses);
           document.getElementById('losses').textContent = losses;
-          gameOver = true;
           document.getElementById('new-game-btn').style.display = 'block';
         } else {
           document.getElementById('message').textContent = '';
         }
         currentRow++;
-        input.value = '';
-        input.focus();
+        currentGuess = '';
       });
     }
-    function giveHint() {
-  if (hints <= 0) {
-    alert('No hints left!');
-    return;
-  }
-  if (gameOver) return;
-  
-  for (let c = 0; c < 5; c++) {
-    const cell = document.getElementById('cell-' + currentRow + '-' + c);
-    if (cell.textContent === '') {
-      cell.textContent = word[c];
-      cell.style.color = '#b59f3b';
-      hints--;
-      document.getElementById('hint-btn').textContent = '💡 Hint (' + hints + ' left)';
-      break;
-    }
-  }
-}
 
+    function giveHint() {
+      if (hints <= 0) { alert('No hints left!'); return; }
+      if (gameOver) return;
+      for (let c = 0; c < 5; c++) {
+        const cell = document.getElementById('cell-' + currentRow + '-' + c);
+        if (cell.textContent === '') {
+          cell.textContent = word[c];
+          cell.style.color = '#b59f3b';
+          currentGuess += word[c];
+          hints--;
+          document.getElementById('hint-btn').textContent = '💡 Hint (' + hints + ' left)';
+          break;
+        }
+      }
+    }
   </script>
 </body>
 </html>
